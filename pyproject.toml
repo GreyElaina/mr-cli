@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "mr-cli"
+version = "0.0.1"
+description = ""
+authors = ["GreyElaina <GreyElaina@outlook.com>"]
+license = "MIT"
+packages = [
+    { include = "mr_cli" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+rich = "^10.8.0"
+typer = "^0.3.2"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+mr = "mr_cli.__main__:main"
