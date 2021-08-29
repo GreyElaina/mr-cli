@@ -89,10 +89,10 @@ def remove(name: str):
         return console.print(f"[bold red]![/] 子包 [bold underline]{name}[/] 的删除流程已经中止.")
 
 @app.command()
-def save(name: str):
+def save(name: str, confirmed: bool = False):
     """将当前工作区的配置保存为指定子包的配置"""
     subpkg = MR_REPOS_PATH / f"repo.{name}.toml"
-    if subpkg.exists() and not typer.confirm(f"? 子包 {name} 已存在, 是否覆盖?", default=False, abort=False):
+    if subpkg.exists() and (confirmed or not typer.confirm(f"? 子包 {name} 已存在, 是否覆盖?", default=False, abort=False)):
         raise typer.Exit(-1)
     subpkg.write_text(PYPROJECT_FILE.read_text(encoding="utf-8"), encoding="utf-8")
     return console.print(f"[bold cyan]I[/] 工作区配置已保存至子包 [bold underline]{name}[/].")

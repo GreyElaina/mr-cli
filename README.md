@@ -49,6 +49,9 @@ mr reset
 
 ```bash
 mr save pkg_name
+
+# 如果想直接确认
+mr save pkg_name --confirmed
 ```
 
 # License / 许可
