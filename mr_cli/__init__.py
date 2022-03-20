@@ -33,28 +33,27 @@ def new(name: str):
     subpkg = MR_REPOS_PATH / f"repo.{name}.toml"
     if subpkg.exists():
         return console.print(f"[bold yellow]?[/] 子包 [bold underline]{name}[/] 已经存在, 跳过该次操作.")
+    if not typer.confirm(f"你确定要为你的项目新建一个名为 {name} 的子包吗?", abort=False):
+        return console.print("[bold red]![/] 本次操作已放弃.")
+    if PYPROJECT_FILE.exists():
+        console.print("已检测到当前环境中的 pyproject.toml 文件., 对其进行临时更名.")
+        PYPROJECT_FILE.rename(".pyproject.toml.temp")
+    console.print(f"[bold cyan]I[/] 即将调用 poetry 创建子包 [bold underline]{name}[/], 请注意, 你不必将 package name 作为你填入的子包名称.")
+    subprocess.call(["poetry", "init"], stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
+    if PYPROJECT_FILE.exists():
+        console.print("[bold cyan]I[/] 检测到 pyproject.toml 已经被创建.")
+        typer.pause(f"要立即将现在的 pyproject.toml 作为子包 [{name}] 的配置保存, 请按回车键继续...")
+        subpkg.touch()
+        subpkg.write_text(PYPROJECT_FILE.read_text(encoding="utf-8"), encoding="utf-8")
+        console.print("[bold cyan]I[/] 配置已保存, 工作区配置已自动切换.")
+        if typer.confirm("需要恢复至您之前的工作区状态吗?"):
+            PYPROJECT_FILE.unlink()
+            PYPROJECT_FILE_TEMP.rename("pyproject.toml")
+            console.print("[bold cyan]I[/] 已恢复至您之前的工作区状态.")
+        console.print(f"[bold cyan]I[/] 子包 [bold underline]{name}[/] 创建流程已结束.")
     else:
-        if not typer.confirm(f"你确定要为你的项目新建一个名为 {name} 的子包吗?", abort=False):
-            return console.print(f"[bold red]![/] 本次操作已放弃.")
-        if PYPROJECT_FILE.exists():
-            console.print(f"已检测到当前环境中的 pyproject.toml 文件., 对其进行临时更名.")
-            PYPROJECT_FILE.rename(".pyproject.toml.temp")
-        console.print(f"[bold cyan]I[/] 即将调用 poetry 创建子包 [bold underline]{name}[/], 请注意, 你不必将 package name 作为你填入的子包名称.")
-        subprocess.call(["poetry", "init"], stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
-        if PYPROJECT_FILE.exists():
-            console.print(f"[bold cyan]I[/] 检测到 pyproject.toml 已经被创建.")
-            typer.pause(f"要立即将现在的 pyproject.toml 作为子包 [{name}] 的配置保存, 请按回车键继续...")
-            subpkg.touch()
-            subpkg.write_text(PYPROJECT_FILE.read_text(encoding="utf-8"), encoding="utf-8")
-            console.print(f"[bold cyan]I[/] 配置已保存, 工作区配置已自动切换.")
-            if typer.confirm("需要恢复至您之前的工作区状态吗?"):
-                PYPROJECT_FILE.unlink()
-                PYPROJECT_FILE_TEMP.rename("pyproject.toml")
-                console.print("[bold cyan]I[/] 已恢复至您之前的工作区状态.")
-            console.print(f"[bold cyan]I[/] 子包 [bold underline]{name}[/] 创建流程已结束.")
-        else:
-            console.print(f"[bold red]![/] 检测到 pyproject.toml 不存在, 子包 [bold underline]{name}[/] 的创建流程中止...")
-            raise typer.Exit(-1)
+        console.print(f"[bold red]![/] 检测到 pyproject.toml 不存在, 子包 [bold underline]{name}[/] 的创建流程中止...")
+        raise typer.Exit(-1)
 
 @app.command()
 def use(name: str):
@@ -71,8 +70,8 @@ def reset():
     """恢复当前工作区"""
     if PYPROJECT_FILE.exists():
         PYPROJECT_FILE.unlink()
-        return console.print(f"[bold cyan]I[/] 工作区配置已清理.")
-    console.print(f"[bold red]![/] 当前不存在任何可用配置.")
+        return console.print("[bold cyan]I[/] 工作区配置已清理.")
+    console.print("[bold red]![/] 当前不存在任何可用配置.")
     raise typer.Exit(-1)
 
 @app.command()
